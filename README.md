@@ -74,7 +74,7 @@ The router uses a trie (prefix tree) to efficiently match incoming request paths
 
 1. **Build:**
    ```sh
-    ./codecrafters-http-server-go/your_program.sh --directory /tmp
+    ./your_program.sh --directory /tmp
    ```
 
 ---
