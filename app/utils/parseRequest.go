@@ -3,6 +3,8 @@ package utils
 import (
 	"bufio"
 	"fmt"
+	"io"
+	"strconv"
 
 	"net"
 	"strings"
@@ -28,6 +30,7 @@ func ParseRequest(conn net.Conn) (*types.Request, error) {
 	}
 	headers := make(map[string]string)
 	//  Read headers , headers can be multliple so loop throught,
+	var contentLength int64
 
 	for {
 		line, err := reader.ReadString('\n')
@@ -44,13 +47,30 @@ func ParseRequest(conn net.Conn) (*types.Request, error) {
 			key := strings.TrimSpace(parts[0])
 			value := strings.TrimSpace(parts[1])
 			headers[key] = value
+			if strings.ToLower(key) == "content-length" {
+				contentLength, err = strconv.ParseInt(value, 10, 64)
+				if err != nil {
+					return nil, fmt.Errorf("failed to convert content length to int: %w", err)
+				}
+
+			}
+
 		}
+	}
+	// 	Return io.LimitReader to ensure only the body gets read.
+
+	var bodyReader io.Reader
+	if contentLength > 0 {
+		bodyReader = io.LimitReader(reader, contentLength)
+
 	}
 
 	return &types.Request{
-		Method:  parts[0],
-		Path:    parts[1],
-		Headers: headers,
+		Method:        parts[0],
+		Path:          parts[1],
+		Headers:       headers,
+		Body:          bodyReader,
+		ContentLength: contentLength,
 	}, nil
 	// Optional head;
 

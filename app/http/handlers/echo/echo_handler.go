@@ -1,7 +1,6 @@
 package echo
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/codecrafters-io/http-server-starter-go/app/pkg/config"
@@ -9,22 +8,19 @@ import (
 	"github.com/codecrafters-io/http-server-starter-go/app/utils"
 )
 
-func Handle(ctx *types.Context) {
+func Handle(ctx *types.Context) error {
 	tokens := strings.Split(ctx.Request.Path, "/")
 	if len(tokens) < 3 {
 		utils.WriteResponse(ctx.Conn, types.Response{
 			StatusCode: config.BadRequest,
 		})
-		return
+		return nil
 	}
 
-	echoBody := tokens[2]+"\n"
+	text := tokens[2]
 	utils.WriteResponse(ctx.Conn, types.Response{
 		StatusCode: config.OK,
-		Body:       echoBody,
-		Headers: map[string]string{
-			"Content-Type":   config.TextContentType,
-			"Content-Length": fmt.Sprintf("%d", len(echoBody)),
-		},
+		Body:       text,
 	})
+	return nil
 }

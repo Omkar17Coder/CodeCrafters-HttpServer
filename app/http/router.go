@@ -38,22 +38,47 @@ func (r *Router) Register(method, path string, handlerFunction types.HandlerFunc
 
 }
 
+// Add this method to your Router struct
+func (r *Router) PrintTree() {
+	printNode(r.root, "", "")
+}
+
+// Helper recursive function
+func printNode(node *TrieNode, prefix, path string) {
+	for part, child := range node.chilren {
+		fullPath := path + "/" + part
+		fmt.Printf("%s├── %s\n", prefix, part)
+		if len(child.handlers) > 0 {
+			for method := range child.handlers {
+				fmt.Printf("%s│   └── [%s] handler registered\n", prefix, method)
+			}
+		}
+		printNode(child, prefix+"│   ", fullPath)
+	}
+}
+
 func (r *Router) Route(method, path string) (types.HandlerFunc, bool) {
 	node := r.root
 	parts := strings.Split(path, "/")
+
 	for _, part := range parts {
 		if part == "" {
 			continue // /api//hello -> /api/hello
 		}
 		if child, exist := node.chilren[part]; exist {
+
 			node = child
 		} else if child, exist := node.chilren["*"]; exist {
 			node = child
+			break
 		} else {
+
 			return nil, false
 		}
 	}
 	handler, exists := node.handlers[method]
+	fmt.Println(handler)
+
 	if !exists {
 		fmt.Println("I dont exits")
 		return nil, false

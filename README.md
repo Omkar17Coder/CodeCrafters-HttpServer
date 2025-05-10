@@ -22,9 +22,10 @@ The server currently supports the following HTTP endpoints:
 - `GET /echo/<text>` - Returns the provided text in the response
 - `GET /user-agent` - Returns the User-Agent header from the request
 - `GET /files/<filename>` - Serves files from the specified directory
-- `POST /files/<filename>` - Accepts file uploads to the specified directory
+- `POST /files/<filename>` - Accepts file uploads to the specified directory 
 
 Each route is handled by its own dedicated handler package, following clean architecture principles.
+Additonal task to work on is  using tmp package of golang to create temprorary files before content actually  updated to desired files since multiple  work on same file and lead to race conndtion that needs to be handeled
 
 ---
 
@@ -40,6 +41,7 @@ codecrafters-http-server-go/
 │   │   │   │   └── echo_handler.go
 │   │   │   ├── files/
 │   │   │   │   └── files_handler.go
+
 │   │   │   ├── root/
 │   │   │   │   └── root_handler.go
 │   │   │   └── user_agent/

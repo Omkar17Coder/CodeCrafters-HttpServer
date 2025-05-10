@@ -10,30 +10,32 @@ import (
 	"github.com/codecrafters-io/http-server-starter-go/app/utils"
 )
 
-func Handle(ctx *types.Context) {
+func GetFile(ctx *types.Context) error {
+
 	tokens := strings.Split(ctx.Request.Path, "/")
 	if len(tokens) < 3 {
+	
 		utils.WriteResponse(ctx.Conn, types.Response{
 			StatusCode: config.BadRequest,
 		})
-		return
+		return fmt.Errorf("invalid path")
 	}
 
 	filePath := tokens[2]
 	actualFile := fmt.Sprintf("%s/app/tmp/%s", ctx.BaseDir, filePath)
-
+	
 	file, err := os.Open(actualFile)
 	if err != nil {
 		if os.IsNotExist(err) {
 			utils.WriteResponse(ctx.Conn, types.Response{
 				StatusCode: config.NotFound,
 			})
-			return
+			return fmt.Errorf("file not found")
 		}
 		utils.WriteResponse(ctx.Conn, types.Response{
 			StatusCode: config.BadRequest,
 		})
-		return
+		return fmt.Errorf("failed to open file: %w", err)
 	}
 	defer file.Close()
 
@@ -43,7 +45,7 @@ func Handle(ctx *types.Context) {
 		utils.WriteResponse(ctx.Conn, types.Response{
 			StatusCode: config.BadRequest,
 		})
-		return
+		return fmt.Errorf("failed to read file: %w", err)
 	}
 
 	fileData := string(data[:count])
@@ -55,4 +57,6 @@ func Handle(ctx *types.Context) {
 			"Content-Length": fmt.Sprintf("%d", count),
 		},
 	})
+
+	return nil
 }

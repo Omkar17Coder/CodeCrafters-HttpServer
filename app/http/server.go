@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"path/filepath"
 
 	"github.com/codecrafters-io/http-server-starter-go/app/http/handlers/echo"
 	"github.com/codecrafters-io/http-server-starter-go/app/http/handlers/files"
@@ -30,7 +29,9 @@ func NewServer() *Server {
 	server.router.Register("GET", "/", root.Handle)
 	server.router.Register("GET", "/echo/*", echo.Handle)
 	server.router.Register("GET", "/user-agent", user_agent.Handle)
-	server.router.Register("GET", "/files/*", files.Handle)
+	server.router.Register("GET", "/files/*", files.GetFile)
+	server.router.Register("POST", "/files/*", files.SetFile)
+	server.router.PrintTree()
 
 	return server
 }
@@ -39,8 +40,7 @@ func resolveBaseDiretory() (string, error) {
 	dirFlag = flag.String("directory", "", "Base directory where files stored")
 	flag.Parse()
 
-	fmt.Println("Raw args:", os.Args)
-	fmt.Println("Parsed directory:", *dirFlag)
+
 	if *dirFlag == "" {
 		fmt.Println("provide the directory")
 		return "", fmt.Errorf("please provide directory using --directory")
@@ -53,8 +53,7 @@ func resolveBaseDiretory() (string, error) {
 		return "", fmt.Errorf("failed to resolve path")
 	}
 
-	baseDir := filepath.Join(currDir, "codecrafters-http-server-go")
-	return baseDir, nil
+	return currDir, nil
 }
 
 func StartServer() {
@@ -97,9 +96,9 @@ func (s *Server) HandleConnection(conn net.Conn, baseDir string) {
 		Request: req,
 		BaseDir: baseDir,
 	}
-
-	handler, found := s.router.Route(req.Method, req.Path)
 	
+	handler, found := s.router.Route(req.Method, req.Path)
+
 	if !found {
 		utils.WriteResponse(conn, types.Response{
 			StatusCode: 404,
@@ -107,5 +106,10 @@ func (s *Server) HandleConnection(conn net.Conn, baseDir string) {
 		return
 	}
 
-	handler(ctx)
+	if err := handler(ctx); err != nil {
+		utils.WriteResponse(conn, types.Response{
+			StatusCode: 400,
+		})
+		return
+	}
 }
