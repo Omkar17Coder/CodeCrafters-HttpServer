@@ -25,6 +25,10 @@ The server currently supports the following HTTP endpoints:
 - `POST /files/<filename>` - Accepts file uploads to the specified directory 
 
 Each route is handled by its own dedicated handler package, following clean architecture principles.
+
+The  Body of Request in streamed into file , instead of loading into the memory.
+
+
 Additonal task to work on is  using tmp package of golang to create temprorary files before content actually  updated to desired files since multiple  work on same file and lead to race conndtion that needs to be handeled
 
 ---
@@ -71,6 +75,7 @@ The router uses a trie (prefix tree) to efficiently match incoming request paths
 - A request to `/echo/hello` will match the `/echo/*` handler.
 
 ---
+
 
 ## How to Run
 
