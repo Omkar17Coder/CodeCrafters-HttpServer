@@ -18,6 +18,7 @@ func WriteResponse(conn net.Conn, res types.Response) {
 	if res.Headers == nil {
 		res.Headers = make(map[string]string)
 	}
+	
 	res.Headers["Content-Length"] = fmt.Sprintf("%d", len(res.Body))
 	res.Headers["Content-Type"] = config.TextContentType
 	res.Headers["Connection"] = "close"

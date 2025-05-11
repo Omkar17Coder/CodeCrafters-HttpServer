@@ -40,7 +40,6 @@ func resolveBaseDiretory() (string, error) {
 	dirFlag = flag.String("directory", "", "Base directory where files stored")
 	flag.Parse()
 
-
 	if *dirFlag == "" {
 		fmt.Println("provide the directory")
 		return "", fmt.Errorf("please provide directory using --directory")
@@ -62,7 +61,18 @@ func StartServer() {
 		fmt.Println("Failed with error:", err.Error())
 		return
 	}
+	blue := "\033[34m"
+	reset := "\033[0m"
 	fmt.Println("Sever starting on port 4221..")
+	fmt.Print(blue + `
+ ██████╗ ███╗   ███╗██╗  ██╗ █████╗ ██████╗ 
+██╔═══██╗████╗ ████║██║ ██╔╝██╔══██╗██╔══██╗
+██║   ██║██╔████╔██║█████╔╝ ███████║██████╔╝
+██║   ██║██║╚██╔╝██║██╔═██╗ ██╔══██║██╔══██╗
+╚██████╔╝██║ ╚═╝ ██║██║  ██╗██║  ██║██║  ██║
+ ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
+                                            
+` + reset)
 
 	listner, err := net.Listen("tcp", "0.0.0.0:4221")
 	if err != nil {
@@ -96,7 +106,7 @@ func (s *Server) HandleConnection(conn net.Conn, baseDir string) {
 		Request: req,
 		BaseDir: baseDir,
 	}
-	
+
 	handler, found := s.router.Route(req.Method, req.Path)
 
 	if !found {
