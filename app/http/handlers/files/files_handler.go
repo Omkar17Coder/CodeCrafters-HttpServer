@@ -14,7 +14,7 @@ func GetFile(ctx *types.Context) error {
 
 	tokens := strings.Split(ctx.Request.Path, "/")
 	if len(tokens) < 3 {
-	
+
 		utils.WriteResponse(ctx.Conn, types.Response{
 			StatusCode: config.BadRequest,
 		})
@@ -23,7 +23,7 @@ func GetFile(ctx *types.Context) error {
 
 	filePath := tokens[2]
 	actualFile := fmt.Sprintf("%s/app/tmp/%s", ctx.BaseDir, filePath)
-	
+
 	file, err := os.Open(actualFile)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -49,14 +49,18 @@ func GetFile(ctx *types.Context) error {
 	}
 
 	fileData := string(data[:count])
-	utils.WriteResponse(ctx.Conn, types.Response{
+
+	res := types.Response{
 		StatusCode: config.OK,
 		Body:       fileData,
 		Headers: map[string]string{
-			"Content-Type":   config.FileContentType,
+			"Content-Type":   config.TextContentType,
 			"Content-Length": fmt.Sprintf("%d", count),
 		},
-	})
+	}
+	res = utils.CompressResponse(res, *ctx.Request)
+
+	utils.WriteResponse(ctx.Conn, res)
 
 	return nil
 }

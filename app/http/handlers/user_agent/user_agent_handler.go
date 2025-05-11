@@ -10,13 +10,16 @@ import (
 
 func Handle(ctx *types.Context) error {
 	userAgent := ctx.Request.Headers["User-Agent"]
-	utils.WriteResponse(ctx.Conn, types.Response{
+	res := types.Response{
 		StatusCode: config.OK,
 		Body:       userAgent,
 		Headers: map[string]string{
 			"Content-Type":   config.TextContentType,
 			"Content-Length": fmt.Sprintf("%d", len(userAgent)),
 		},
-	})
+	}
+	res = utils.CompressResponse(res, *ctx.Request)
+
+	utils.WriteResponse(ctx.Conn, res)
 	return nil
 }

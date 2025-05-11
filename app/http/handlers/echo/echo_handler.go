@@ -3,6 +3,8 @@ package echo
 import (
 	"strings"
 
+	"fmt"
+
 	"github.com/codecrafters-io/http-server-starter-go/app/pkg/config"
 	"github.com/codecrafters-io/http-server-starter-go/app/types"
 	"github.com/codecrafters-io/http-server-starter-go/app/utils"
@@ -18,9 +20,16 @@ func Handle(ctx *types.Context) error {
 	}
 
 	text := tokens[2]
-	utils.WriteResponse(ctx.Conn, types.Response{
+	res := types.Response{
 		StatusCode: config.OK,
 		Body:       text,
-	})
+		Headers: map[string]string{
+			"Content-Type":   config.TextContentType,
+			"Content-Length": fmt.Sprintf("%d", len(text)),
+		},
+	}
+	res = utils.CompressResponse(res, *ctx.Request)
+
+	utils.WriteResponse(ctx.Conn, res)
 	return nil
 }
